@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ 무사히 조퇴하라! - 조퇴 게임</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', '맑은 고딕', sans-serif;
+        }
+
+        body {
+            background-color: #f4f6f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .game-container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 450px;
+            position: relative;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        p.subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        /* 몬스터 / 상사 상태 레이아웃 */
+        .boss-box {
+            background-color: #fff0f0;
+            border: 2px solid #ff4d4d;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .boss-emoji {
+            font-size: 60px;
+            margin-bottom: 10px;
+        }
+
+        .boss-status {
+            font-weight: bold;
+            font-size: 18px;
+            color: #d9534f;
+        }
+
+        /* 진행도 (조퇴 게이지) */
+        .gauge-container {
+            background-color: #eee;
+            border-radius: 10px;
+            height: 25px;
+            width: 100%;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .gauge-bar {
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .gauge-text {
+            font-size: 14px;
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 25px;
+        }
+
+        /* 컨트롤 버튼 */
+        .btn-escape {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 18px 0;
+            width: 100%;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #388E3C;
+            transition: all 0.1s;
+        }
+
+        .btn-escape:active {
+            box-shadow: 0 2px 0 #388E3C;
+            transform: translateY(3px);
+        }
+
+        .btn-escape:disabled {
+            background-color: #ccc;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 결과 화면 (팝업 modal) */
+        .modal {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal h2 {
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+
+        .modal p {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .btn-restart {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <h1>🏃‍♂️ 무사 조퇴 작전!</h1>
+        <p class="subtitle">상사 몰래 버튼을 눌러 탈출 게이지를 채우세요!</p>
+
+        <!-- 상사 상태 표시 영역 -->
+        <div class="boss-box" id="bossBox">
+            <div class="boss-emoji" id="bossEmoji">🖥️</div>
+            <div class="boss-status" id="bossStatus">상사가 일하는 중... (안 봄)</div>
+        </div>
+
+        <!-- 탈출 진행 게이지 -->
+        <div class="gauge-container">
+            <div class="gauge-bar" id="gaugeBar"></div>
+        </div>
+        <div class="gauge-text" id="gaugeText">탈출 진행도: 0%</div>
+
+        <!-- 게임 실행 버튼 -->
+        <button class="btn-escape" id="escapeBtn" onclick="escapeClick()">🏃‍♂️ 조퇴 시도 (클릭!)</button>
+
+        <!-- 결과 게임오버/성공 모달 -->
+        <div class="modal" id="resultModal">
+            <h2 id="modalTitle">성공!</h2>
+            <p id="modalDesc">축하합니다! 무사히 조퇴하셨습니다!</p>
+            <button class="btn-restart" onclick="startGame()">다시 도전하기</button>
+        </div>
+    </div>
+
+    <script>
+        let progress = 0;
+        let isBossWatching = false;
+        let gameActive = true;
+        let bossTimer = null;
+
+        const gaugeBar = document.getElementById('gaugeBar');
+        const gaugeText = document.getElementById('gaugeText');
+        const bossEmoji = document.getElementById('bossEmoji');
+        const bossStatus = document.getElementById('bossStatus');
+        const bossBox = document.getElementById('bossBox');
+        const resultModal = document.getElementById('resultModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalDesc = document.getElementById('modalDesc');
+
+        // 게임 시작 및 초기화
+        function startGame() {
+            progress = 0;
+            gameActive = true;
+            updateGauge();
+            resultModal.style.display = 'none';
+            changeBossState(false);
+            
+            // 상사 시선 주기적 변경 시작
+            scheduleBoss();
+        }
+
+        // 게이지 업
+        function escapeClick() {
+            if (!gameActive) return;
+
+            // 상사가 보고 있을 때 누르면 게임 오버
+            if (isBossWatching) {
+                gameOver(false, "👀 억! 상사와 눈이 마주쳤습니다.<br>'O대리, 어디 가나?'");
+                return;
+            }
+
+            // 게이지 상승 (클릭당 5%)
+            progress += 5;
+            if (progress >= 100) {
+                progress = 100;
+                updateGauge();
+                gameOver(true, "🎉 축하합니다!<br>상사 몰래 완벽하게 조퇴에 성공했습니다!");
+                return;
+            }
+
+            updateGauge();
+        }
+
+        // 게이지 UI 업데이트
+        function updateGauge() {
+            gaugeBar.style.width = progress + '%';
+            gaugeText.innerText = `탈출 진행도: ${progress}%`;
+        }
+
+        // 상사 상태 무작위 전환
+        function scheduleBoss() {
+            if (!gameActive) return;
+
+            // 1.5초~4초 사이 랜덤 시간 후 상사가 뒤돌아봄
+            const randomTime = Math.floor(Math.random() * 2500) + 1500;
+
+            bossTimer = setTimeout(() => {
+                if (!gameActive) return;
+
+                // 상사가 쳐다봄
+                changeBossState(true);
+
+                // 1초~2초 동안 쳐다본 후 다시 일함
+                const watchTime = Math.floor(Math.random() * 1000) + 1000;
+                setTimeout(() => {
+                    if (!gameActive) return;
+                    changeBossState(false);
+                    scheduleBoss(); // 루프
+                }, watchTime);
+
+            }, randomTime);
+        }
+
+        // 상사 상태 변경 (CSS 및 텍스트 반영)
+        function changeBossState(watching) {
+            isBossWatching = watching;
+            if (watching) {
+                bossEmoji.innerText = '👀';
+                bossStatus.innerText = '⚠️ 상사가 둘러보는 중!! (클릭 금지)';
+                bossStatus.style.color = '#ff0000';
+                bossBox.style.backgroundColor = '#ffe6e6';
+            } else {
+                bossEmoji.innerText = '🖥️';
+                bossStatus.innerText = '상사가 일하는 중... (지금이다!)';
+                bossStatus.style.color = '#2e7d32';
+                bossBox.style.backgroundColor = '#e8f5e9';
+            }
+        }
+
+        // 게임 종료 처리 (승리/패배)
+        function gameOver(isWin, message) {
+            gameActive = false;
+            clearTimeout(bossTimer);
+
+            modalTitle.innerText = isWin ? "🎉 조퇴 성공!" : "💥 걸렸다!";
+            modalTitle.style.color = isWin ? "#4CAF50" : "#f44336";
+            modalDesc.innerHTML = message;
+            
+            resultModal.style.display = 'flex';
+        }
+
+        // 페이지 로드시 게임 자동 시작
+        window.onload = startGame;
+    </script>
+</body>
+</html>
