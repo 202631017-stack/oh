@@ -3,377 +3,258 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎰 미니 비디오 포커 게임</title>
+    <title>🃏 텍사스 홀덤 AI 대전</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Pretendard', '맑은 고딕', sans-serif;
-        }
-
-        body {
-            background-color: #0f380f;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .poker-table {
-            background-color: #1e561e;
-            border: 12px solid #5c3a21;
-            border-radius: 30px;
-            padding: 30px;
-            width: 100%;
-            max-width: 650px;
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.5), 0 10px 30px rgba(0,0,0,0.5);
-            text-align: center;
-        }
-
-        h1 {
-            color: #ffd700;
-            margin-bottom: 5px;
-            font-size: 28px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
-        }
-
-        .info-bar {
-            display: flex;
-            justify-content: space-between;
-            background: rgba(0, 0, 0, 0.4);
-            padding: 12px 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .chips { color: #ffd700; }
-        .bet { color: #ff6b6b; }
-
-        /* 카드 영역 */
-        .card-container {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 25px;
-        }
-
-        .card {
-            width: 18%;
-            height: 120px;
-            background-color: white;
-            color: black;
-            border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 8px;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-            user-select: none;
-            position: relative;
-            transition: transform 0.2s, border 0.2s;
-        }
-
-        .card.red { color: #e63946; }
-        .card.black { color: #1d3557; }
-
-        .card.hold {
-            transform: translateY(-10px);
-            border: 4px solid #ffd700;
-        }
-
-        .card.hold::after {
-            content: "HOLD";
-            position: absolute;
-            top: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #ffd700;
-            color: black;
-            font-size: 11px;
-            font-weight: bold;
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
-
-        .card-back {
-            background: repeating-linear-gradient(
-                45deg,
-                #b80000,
-                #b80000 10px,
-                #800000 10px,
-                #800000 20px
-            );
-            color: transparent !important;
-            border: 2px solid #fff;
-        }
-
-        .card .suit-center {
-            font-size: 32px;
-            align-self: center;
-        }
-
-        /* 메세지 / 결과 출력 */
-        .message-box {
-            height: 40px;
-            font-size: 20px;
-            font-weight: bold;
-            color: #ffeead;
-            margin-bottom: 20px;
-        }
-
-        /* 컨트롤 버튼들 */
-        .controls {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        button {
-            background: #ffd700;
-            color: #333;
-            border: none;
-            padding: 12px 24px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 8px;
-            cursor: pointer;
-            box-shadow: 0 4px 0 #b89b00;
-            transition: all 0.1s;
-        }
-
-        button:active {
-            transform: translateY(3px);
-            box-shadow: 0 1px 0 #b89b00;
-        }
-
-        button:disabled {
-            background: #888;
-            color: #ccc;
-            box-shadow: none;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .btn-bet { background: #4ecdc4; box-shadow: 0 4px 0 #32968f; color: white; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Pretendard', sans-serif; }
+        body { background: #0f380f; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .table { background: #1e561e; border: 12px solid #5c3a21; border-radius: 40px; padding: 25px; width: 100%; max-width: 800px; box-shadow: inset 0 0 50px #000; text-align: center; }
+        h1 { color: #ffd700; margin-bottom: 10px; font-size: 26px; }
+        
+        .pot-area { background: rgba(0,0,0,0.5); border-radius: 10px; padding: 10px 20px; font-size: 20px; font-weight: bold; color: #ffd700; display: inline-block; margin-bottom: 15px; }
+        
+        .zone { background: rgba(0,0,0,0.2); border-radius: 15px; padding: 15px; margin-bottom: 15px; position: relative; }
+        .zone-title { font-size: 14px; color: #aaa; margin-bottom: 8px; font-weight: bold; }
+        
+        .cards { display: flex; justify-content: center; gap: 10px; min-height: 100px; }
+        .card { width: 65px; height: 95px; background: white; color: black; border-radius: 8px; font-size: 18px; font-weight: bold; display: flex; flex-direction: column; justify-content: space-between; padding: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .card.red { color: #d00000; }
+        .card.black { color: #000; }
+        .card-back { background: repeating-linear-gradient(45deg, #b80000, #b80000 10px, #800000 10px, #800000 20px); color: transparent !important; border: 2px solid #fff; }
+        
+        .status-msg { font-size: 18px; color: #ffeead; font-weight: bold; min-height: 28px; margin-bottom: 15px; }
+        
+        .controls { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+        button { background: #ffd700; color: #333; border: none; padding: 12px 18px; font-size: 15px; font-weight: bold; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 0 #b89b00; }
+        button:active { transform: translateY(2px); box-shadow: 0 2px 0 #b89b00; }
+        button:disabled { background: #555; color: #888; box-shadow: none; cursor: not-allowed; }
+        .btn-fold { background: #ff4d4d; color: white; box-shadow: 0 4px 0 #b30000; }
+        .btn-raise { background: #4caf50; color: white; box-shadow: 0 4px 0 #2e7d32; }
     </style>
 </head>
 <body>
 
-    <div class="poker-table">
-        <h1>♠️ 비디오 포커 ♣️</h1>
-        
-        <div class="info-bar">
-            <div>보유 칩: <span class="chips" id="chipCount">1000</span></div>
-            <div>배팅 칩: <span class="bet" id="betCount">100</span></div>
-        </div>
-
-        <div class="message-box" id="message">배팅 후 [게임 시작]을 누르세요!</div>
-
-        <!-- 카드 5장 -->
-        <div class="card-container" id="cardContainer">
-            <div class="card card-back"></div>
-            <div class="card card-back"></div>
-            <div class="card card-back"></div>
-            <div class="card card-back"></div>
-            <div class="card card-back"></div>
-        </div>
-
-        <!-- 조작 버튼 -->
-        <div class="controls">
-            <button class="btn-bet" id="btnBet" onclick="changeBet()">배팅 변경 (+100)</button>
-            <button id="btnAction" onclick="handleAction()">게임 시작</button>
-        </div>
+<div class="table">
+    <h1>♠️ TEXAS HOLD'EM ♣️</h1>
+    
+    <!-- AI 영역 -->
+    <div class="zone">
+        <div class="zone-title">🤖 AI 상대 (칩: <span id="aiChips">1000</span>) | 배팅: <span id="aiBet">0</span></div>
+        <div class="cards" id="aiCards"></div>
     </div>
 
-    <script>
-        const suits = ['♠', '♥', '♦', '♣'];
-        const values = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]; // 11:J, 12:Q, 13:K, 14:A
+    <!-- 공유 카드 영역 -->
+    <div class="pot-area">💰 Total POT: <span id="pot">0</span></div>
+    <div class="zone">
+        <div class="zone-title">COMMUNITY CARDS</div>
+        <div class="cards" id="communityCards"></div>
+    </div>
+
+    <!-- 플레이어 영역 -->
+    <div class="zone">
+        <div class="zone-title">👤 Player (칩: <span id="playerChips">1000</span>) | 배팅: <span id="playerBet">0</span></div>
+        <div class="cards" id="playerCards"></div>
+    </div>
+
+    <div class="status-msg" id="msg">게임을 시작하려면 [새 게임]을 누르세요.</div>
+
+    <!-- 버튼 제어 -->
+    <div class="controls">
+        <button id="btnStart" onclick="startHand()">🎮 새 게임</button>
+        <button id="btnFold" class="btn-fold" onclick="playerAction('fold')" disabled>Fold</button>
+        <button id="btnCheck" onclick="playerAction('check')" disabled>Check</button>
+        <button id="btnCall" onclick="playerAction('call')" disabled>Call</button>
+        <button id="btnRaise" class="btn-raise" onclick="playerAction('raise')" disabled>Raise (+50)</button>
+    </div>
+</div>
+
+<script>
+    const suits = ['♠', '♥', '♦', '♣'];
+    const values = [2,3,4,5,6,7,8,9,10,11,12,13,14];
+    
+    let deck = [], playerHand = [], aiHand = [], communityCards = [];
+    let playerChips = 1000, aiChips = 1000, pot = 0;
+    let playerBet = 0, aiBet = 0, currentHighBet = 0;
+    let stage = 0; // 0: Pre-flop, 1: Flop, 2: Turn, 3: River, 4: Showdown
+
+    function createDeck() {
+        deck = [];
+        for (let s of suits) for (let v of values) deck.push({ suit: s, value: v });
+        deck.sort(() => Math.random() - 0.5);
+    }
+
+    function getValName(v) { return v === 14 ? 'A' : v === 13 ? 'K' : v === 12 ? 'Q' : v === 11 ? 'J' : v; }
+
+    function renderCard(card, hidden = false) {
+        if (hidden) return `<div class="card card-back"></div>`;
+        const isRed = card.suit === '♥' || card.suit === '♦';
+        const name = getValName(card.value);
+        return `<div class="card ${isRed ? 'red' : 'black'}">
+            <div>${name}${card.suit}</div>
+            <div style="text-align:center;font-size:22px;">${card.suit}</div>
+            <div style="text-align:right;">${name}</div>
+        </div>`;
+    }
+
+    function updateUI() {
+        document.getElementById('playerChips').innerText = playerChips;
+        document.getElementById('aiChips').innerText = aiChips;
+        document.getElementById('playerBet').innerText = playerBet;
+        document.getElementById('aiBet').innerText = aiBet;
+        document.getElementById('pot').innerText = pot;
+
+        document.getElementById('playerCards').innerHTML = playerHand.map(c => renderCard(c)).join('');
+        document.getElementById('aiCards').innerHTML = aiHand.map(c => renderCard(c, stage < 4)).join('');
+        document.getElementById('communityCards').innerHTML = communityCards.map(c => renderCard(c)).join('');
+
+        const isPlayerTurn = stage < 4;
+        document.getElementById('btnFold').disabled = !isPlayerTurn;
+        document.getElementById('btnCheck').disabled = !isPlayerTurn || playerBet !== currentHighBet;
+        document.getElementById('btnCall').disabled = !isPlayerTurn || playerBet === currentHighBet;
+        document.getElementById('btnRaise').disabled = !isPlayerTurn;
+    }
+
+    function startHand() {
+        if(playerChips <= 0 || aiChips <= 0) { alert("칩을 모두 잃었습니다. 게임을 리셋합니다."); playerChips=1000; aiChips=1000; }
+        createDeck();
+        stage = 0; pot = 0; playerBet = 0; aiBet = 0; currentHighBet = 0;
         
-        let deck = [];
-        let hand = [];
-        let heldCards = [false, false, false, false, false];
-        let gameState = 'IDLE'; // IDLE, DEAL, END
+        // 블라인드 배팅 (기본 10칩)
+        playerChips -= 10; playerBet = 10;
+        aiChips -= 10; aiBet = 10;
+        pot = 20; currentHighBet = 10;
+
+        playerHand = [deck.pop(), deck.pop()];
+        aiHand = [deck.pop(), deck.pop()];
+        communityCards = [];
+
+        document.getElementById('btnStart').disabled = true;
+        document.getElementById('msg').innerText = "프리플랍: 액션을 선택하세요.";
+        updateUI();
+    }
+
+    function playerAction(action) {
+        if(action === 'fold') {
+            endHand(false, "플레이어가 폴드했습니다. AI 승리!");
+            return;
+        } else if(action === 'check') {
+            // 체크 진행
+        } else if(action === 'call') {
+            let diff = currentHighBet - playerBet;
+            playerChips -= diff; pot += diff; playerBet = currentHighBet;
+        } else if(action === 'raise') {
+            let raiseAmt = 50;
+            let total = (currentHighBet - playerBet) + raiseAmt;
+            playerChips -= total; pot += total;
+            playerBet += total; currentHighBet = playerBet;
+        }
+
+        updateUI();
+        setTimeout(aiTurn, 600);
+    }
+
+    function aiTurn() {
+        // 간단한 AI 베팅 판단 알고리즘
+        if (aiBet < currentHighBet) {
+            let diff = currentHighBet - aiBet;
+            if (diff > 100 && Math.random() < 0.3) {
+                endHand(true, "AI가 폴드했습니다. 플레이어 승리!");
+                return;
+            } else {
+                aiChips -= diff; pot += diff; aiBet = currentHighBet;
+                document.getElementById('msg').innerText = "AI가 Call 했습니다.";
+            }
+        } else {
+            document.getElementById('msg').innerText = "AI가 Check 했습니다.";
+        }
+
+        updateUI();
+        setTimeout(nextStage, 800);
+    }
+
+    function nextStage() {
+        playerBet = 0; aiBet = 0; currentHighBet = 0;
+        stage++;
+
+        if (stage === 1) { // 플랍 (3장)
+            communityCards.push(deck.pop(), deck.pop(), deck.pop());
+            document.getElementById('msg').innerText = "플랍(Flop) 카드가 오픈되었습니다.";
+        } else if (stage === 2) { // 턴 (1장)
+            communityCards.push(deck.pop());
+            document.getElementById('msg').innerText = "턴(Turn) 카드가 오픈되었습니다.";
+        } else if (stage === 3) { // 리버 (1장)
+            communityCards.push(deck.pop());
+            document.getElementById('msg').innerText = "리버(River) 카드가 오픈되었습니다.";
+        } else if (stage === 4) { // 쇼다운
+            evaluateShowdown();
+            return;
+        }
+        updateUI();
+    }
+
+    // 7장의 카드 중 최선의 5장 족보 점수 계산
+    function getBestScore(cards) {
+        let maxScore = 0;
+        // 7장 중 5장을 뽑는 모든 조합 계산
+        for(let i=0; i<cards.length; i++) {
+            for(let j=i+1; j<cards.length; j++) {
+                let five = cards.filter((_, idx) => idx !== i && idx !== j);
+                let score = eval5Cards(five);
+                if(score > maxScore) maxScore = score;
+            }
+        }
+        return maxScore;
+    }
+
+    function eval5Cards(cards) {
+        let vals = cards.map(c => c.value).sort((a,b)=>b-a);
+        let suitsArr = cards.map(c => c.suit);
+        let isFlush = suitsArr.every(s => s === suitsArr[0]);
+        let isStraight = (vals[0]-vals[4] === 4 && new Set(vals).size === 5) || 
+                         (vals[0]===14 && vals[1]===5 && vals[2]===4 && vals[3]===3 && vals[4]===2);
+
+        let counts = {};
+        vals.forEach(v => counts[v] = (counts[v]||0) + 1);
+        let cVals = Object.values(counts).sort((a,b)=>b-a);
+
+        let base = 0;
+        if(isFlush && isStraight) base = 8000000;
+        else if(cVals[0]===4) base = 7000000;
+        else if(cVals[0]===3 && cVals[1]===2) base = 6000000;
+        else if(isFlush) base = 5000000;
+        else if(isStraight) base = 4000000;
+        else if(cVals[0]===3) base = 3000000;
+        else if(cVals[0]===2 && cVals[1]===2) base = 2000000;
+        else if(cVals[0]===2) base = 1000000;
+
+        return base + vals[0]*10000 + vals[1]*1000 + vals[2]*100 + vals[3]*10 + vals[4];
+    }
+
+    function evaluateShowdown() {
+        let pScore = getBestScore([...playerHand, ...communityCards]);
+        let aiScore = getBestScore([...aiHand, ...communityCards]);
+
+        updateUI(); // AI 카드 공개
+
+        if(pScore > aiScore) {
+            endHand(true, "🎉 쇼다운 승리! 당신이 팟을 획득했습니다.");
+        } else if(pScore < aiScore) {
+            endHand(false, "🤖 쇼다운 패배! AI가 팟을 획득했습니다.");
+        } else {
+            playerChips += pot / 2; aiChips += pot / 2;
+            document.getElementById('msg').innerText = "무승부! 팟을 나눠 가집니다.";
+            document.getElementById('btnStart').disabled = false;
+        }
+    }
+
+    function endHand(playerWins, message) {
+        if(playerWins) playerChips += pot;
+        else aiChips += pot;
         
-        let chips = 1000;
-        let currentBet = 100;
-
-        // 덱 생성 및 셔플
-        function createDeck() {
-            deck = [];
-            for (let s of suits) {
-                for (let v of values) {
-                    deck.push({ suit: s, value: v });
-                }
-            }
-            deck.sort(() => Math.random() - 0.5);
-        }
-
-        // 숫자 표시용 변환 (11 -> J, 14 -> A 등)
-        function getCardValueName(v) {
-            if (v === 11) return 'J';
-            if (v === 12) return 'Q';
-            if (v === 13) return 'K';
-            if (v === 14) return 'A';
-            return v.toString();
-        }
-
-        // 배팅 금액 변경
-        function changeBet() {
-            if (gameState !== 'IDLE') return;
-            currentBet += 100;
-            if (currentBet > 500) currentBet = 100;
-            if (currentBet > chips) currentBet = chips;
-            document.getElementById('betCount').innerText = currentBet;
-        }
-
-        // 카드 클릭 시 HOLD 토글
-        function toggleHold(index) {
-            if (gameState !== 'DEAL') return;
-            heldCards[index] = !heldCards[index];
-            renderHand();
-        }
-
-        // 메인 버튼 동작 관리 (게임시작 -> 카드교체 -> 다음게임)
-        function handleAction() {
-            const btn = document.getElementById('btnAction');
-            const btnBet = document.getElementById('btnBet');
-
-            if (gameState === 'IDLE' || gameState === 'END') {
-                if (chips < currentBet) {
-                    alert("칩이 부족합니다!");
-                    return;
-                }
-
-                // 시작 처리
-                chips -= currentBet;
-                updateUI();
-                createDeck();
-                heldCards = [false, false, false, false, false];
-
-                // 5장 차례로 뽑기
-                hand = deck.splice(0, 5);
-                gameState = 'DEAL';
-
-                document.getElementById('message').innerText = "남길 카드를 클릭(HOLD) 후 [카드 교체]를 누르세요.";
-                btn.innerText = "카드 교체";
-                btnBet.disabled = true;
-
-                renderHand();
-
-            } else if (gameState === 'DEAL') {
-                // 선택 안 한 카드는 덱에서 새로 뽑아 교체
-                for (let i = 0; i < 5; i++) {
-                    if (!heldCards[i]) {
-                        hand[i] = deck.pop();
-                    }
-                }
-
-                gameState = 'END';
-                renderHand();
-                evaluateHand();
-
-                btn.innerText = "다음 판 하기";
-                btnBet.disabled = false;
-            }
-        }
-
-        // 카드 화면 렌더링
-        function renderHand() {
-            const container = document.getElementById('cardContainer');
-            container.innerHTML = '';
-
-            hand.forEach((card, index) => {
-                const cardDiv = document.createElement('div');
-                const isRed = card.suit === '♥' || card.suit === '♦';
-                
-                cardDiv.className = `card ${isRed ? 'red' : 'black'} ${heldCards[index] ? 'hold' : ''}`;
-                cardDiv.onclick = () => toggleHold(index);
-
-                const valName = getCardValueName(card.value);
-                cardDiv.innerHTML = `
-                    <div>${valName} ${card.suit}</div>
-                    <div class="suit-center">${card.suit}</div>
-                    <div style="text-align: right;">${valName}</div>
-                `;
-
-                container.appendChild(cardDiv);
-            });
-        }
-
-        // 족보 판단 알고리즘
-        function evaluateHand() {
-            const vals = hand.map(c => c.value).sort((a, b) => a - b);
-            const suitsArr = hand.map(c => c.suit);
-
-            const isFlush = suitsArr.every(s => s === suitsArr[0]);
-            
-            // 스트레이트 체크 (A,2,3,4,5 예외 처리 포함)
-            let isStraight = false;
-            if (vals[4] - vals[0] === 4 && new Set(vals).size === 5) {
-                isStraight = true;
-            } else if (vals[0] === 2 && vals[1] === 3 && vals[2] === 4 && vals[3] === 5 && vals[4] === 14) {
-                isStraight = true;
-            }
-
-            // 숫자별 빈도수 체크
-            const counts = {};
-            vals.forEach(v => counts[v] = (counts[v] || 0) + 1);
-            const countValues = Object.values(counts).sort((a, b) => b - a);
-
-            let winMultiplier = 0;
-            let resultText = "";
-
-            if (isFlush && isStraight && vals[4] === 14 && vals[0] === 10) {
-                winMultiplier = 250; resultText = "👑 로열 스트레이트 플러시!!";
-            } else if (isFlush && isStraight) {
-                winMultiplier = 50; resultText = "🔥 스트레이트 플러시!";
-            } else if (countValues[0] === 4) {
-                winMultiplier = 25; resultText = "✨ 포카드 (Four of a Kind)";
-            } else if (countValues[0] === 3 && countValues[1] === 2) {
-                winMultiplier = 9; resultText = "🏠 풀하우스 (Full House)";
-            } else if (isFlush) {
-                winMultiplier = 6; resultText = "🎨 플러시 (Flush)";
-            } else if (isStraight) {
-                winMultiplier = 4; resultText = "📏 스트레이트 (Straight)";
-            } else if (countValues[0] === 3) {
-                winMultiplier = 3; resultText = "☘️ 트리플 (Three of a Kind)";
-            } else if (countValues[0] === 2 && countValues[1] === 2) {
-                winMultiplier = 2; resultText = "✌️ 투 페어 (Two Pair)";
-            } else if (countValues[0] === 2) {
-                // Jacks or Better (J 이상 페어만 인정)
-                const pairValue = parseInt(Object.keys(counts).find(key => counts[key] === 2));
-                if (pairValue >= 11) {
-                    winMultiplier = 1; resultText = "👍 원 페어 (Jacks or Better)";
-                } else {
-                    resultText = "❌ 노페어 (아쉬워요!)";
-                }
-            } else {
-                resultText = "❌ 노페어 (아쉬워요!)";
-            }
-
-            const winAmount = currentBet * winMultiplier;
-            chips += winAmount;
-
-            if (winMultiplier > 0) {
-                document.getElementById('message').innerText = `${resultText} - ${winAmount} 칩 획득!`;
-            } else {
-                document.getElementById('message').innerText = resultText;
-            }
-
-            updateUI();
-        }
-
-        function updateUI() {
-            document.getElementById('chipCount').innerText = chips;
-        }
-    </script>
+        pot = 0;
+        document.getElementById('msg').innerText = message;
+        document.getElementById('btnStart').disabled = false;
+        updateUI();
+    }
+</script>
 </body>
-</html>           
+</html>
